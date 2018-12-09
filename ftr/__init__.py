@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-u"""
+"""
 Copyright 2015 Olivier Cortès <oc@1flow.io>.
 
 This file is part of the python-ftr project.
@@ -40,7 +40,7 @@ from .extractor import (  # NOQA
     ContentExtractor
 )
 
-from process import (  # NOQA
+from .process import (  # NOQA
     ftr_process as process,
 )
 

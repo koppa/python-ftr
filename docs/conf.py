@@ -53,8 +53,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Python FTR'
-copyright = u'2015, Olivier Cortès'
+project = 'Python FTR'
+copyright = '2015, Olivier Cortès'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -203,8 +203,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'PythonFTR.tex', u'Python FTR Documentation',
-   u'Olivier Cortès', 'manual'),
+  ('index', 'PythonFTR.tex', 'Python FTR Documentation',
+   'Olivier Cortès', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -233,8 +233,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pythonftr', u'Python FTR Documentation',
-     [u'Olivier Cortès'], 1)
+    ('index', 'pythonftr', 'Python FTR Documentation',
+     ['Olivier Cortès'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -247,8 +247,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'PythonFTR', u'Python FTR Documentation',
-   u'Olivier Cortès', 'PythonFTR', 'One line description of project.',
+  ('index', 'PythonFTR', 'Python FTR Documentation',
+   'Olivier Cortès', 'PythonFTR', 'One line description of project.',
    'Miscellaneous'),
 ]
 

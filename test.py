@@ -1,32 +1,24 @@
 #!env python
 # -*- coding: utf-8 -*-
-u""" Run a testsuite to check everything is OK in FTR. """
+""" Run a testsuite to check everything is OK in FTR. """
 
 import sys
 import os
-
-# HEADS UP: this is needed before importing ftr for the module
-#           to attach the SQLite handler before logging anything.
-os.environ['FTR_TEST_ENABLE_SQLITE_LOGGING'] = '1'
 
 import random
 # import lxml.etree
 import ftr
 import ftr.config
-from ftr.app import SQLiteHandler
 import logging
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.addHandler(SQLiteHandler(store_only=('siteconfig', ), clear_first=True))
 
 FTR_SITECONFIG_PATH = os.environ.get(
     'FTR_SITECONFIG_PATH',
-    os.path.expanduser(u'~/sources/ftr-site-config')
+    os.path.expanduser('~/sources/ftr-site-config')
 )
 
 
-# Do not cache this, it's a generator and do not cost a lot, anyway.
-# @ftr.config.cached(ftr.config.CACHE_TIMEOUT)
 def load_test_urls():
     """ Yield all `test_url` directives values from all local siteconfig.
 
@@ -82,7 +74,7 @@ def test():
         START_AT = 0
 
     if START_AT > 0:
-        LOGGER.info(u'Skipping until URL #%s…', START_AT)
+        LOGGER.info('Skipping until URL #%s…', START_AT)
 
     for index, item in enumerate(load_test_urls()):
 
@@ -90,25 +82,25 @@ def test():
             continue
 
         if isinstance(item, ftr.NoTestUrlException):
-            LOGGER.critical(u'No test URL in %s!', item.filename,
+            LOGGER.critical('No test URL in %s!', item.filename,
                             extra={'siteconfig': item.siteconfig_name})
             continue
 
         url, siteconfig = item
 
-        LOGGER.info(u'Testing URL #%s %s…', index, url,
+        LOGGER.info('Testing URL #%s %s…', index, url,
                     extra={'siteconfig': siteconfig})
 
         try:
             extractor = ftr.process(url)
 
         except Exception:
-            LOGGER.exception(u'Error while parsing %s', url,
+            LOGGER.exception('Error while parsing %s', url,
                              extra={'siteconfig': siteconfig})
             continue
 
         if extractor is None:
-            LOGGER.error(u'Network problem while extracting.',
+            LOGGER.error('Network problem while extracting.',
                          extra={'siteconfig': siteconfig})
             continue
 

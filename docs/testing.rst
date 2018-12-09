@@ -83,8 +83,3 @@ Testsuite environment variables
   useful when you run the tests on your own and manually edit siteconfig files
   to rapidly test modifications locally before submitting PRs. Default: unset,
   thus siteconfig files are reloaded only when the cache expires (eg. 3 days).
-
-- ``FTR_TEST_ENABLE_SQLITE_LOGGING``: **this variable is internal, do
-  not touch it at all**. The test script manages it alone, and use it to enable the
-  SQL logging everywhere in `ftr`. In normal conditions, SQL logging is
-  disabled for obvious performance reasons.

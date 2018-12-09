@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-u""" The :func:`~ftr.process.ftr_process` function makes use of all FTR
+""" The :func:`~ftr.process.ftr_process` function makes use of all FTR
 objects to offer an easy-to-use *one-liner* to integrate in your python
 code.
 
@@ -31,39 +31,22 @@ have the HTML and the original URL handy.
     License along with python-ftr. If not, see http://www.gnu.org/licenses/
 """
 
-import os
 import logging
 
-try:
-    import requests
+import requests
 
-except ImportError:
-    # Happens during installation before setup.py finishes installing deps.
-    requests = None
-
-from .config import ftr_get_config, SiteConfig, CACHE_TIMEOUT, cached
+from .config import ftr_get_config, SiteConfig
 from .extractor import ContentExtractor
-
-try:
-    from sparks.utils.http import (
-        detect_encoding_from_requests_response,
-        split_url,
-    )
-
-except ImportError:
-    # same problem, same effect.
-    pass
 
 LOGGER = logging.getLogger(__name__)
 
-if bool(os.environ.get('FTR_TEST_ENABLE_SQLITE_LOGGING', False)):
-    from ftr.app import SQLiteHandler
-    LOGGER.addHandler(SQLiteHandler(store_only=('siteconfig', )))
+
+def split_url(u):
+    raise NotImplementedError("Not implemented, originally in sparks")
 
 
-@cached(timeout=CACHE_TIMEOUT)
 def requests_get(url):
-    """ Run :func:`requests.get` in a ``cached()`` wrapper.
+    """ Run :func:`requests.get`.
 
     The cache wrapper uses the default timeout (environment variable
     ``PYTHON_FTR_CACHE_TIMEOUT``, 3 days by default).
@@ -71,43 +54,42 @@ def requests_get(url):
     It is used in :func:`ftr_process`.
     """
 
-    LOGGER.info(u'Fetching %s…', url)
+    LOGGER.info('Fetching %s…', url)
     return requests.get(url)
 
 
 def sanitize_next_page_link(next_page_link, base_url):
     """ Convert relative links or query_string only links to absolute URLs. """
 
-    if not next_page_link.startswith(u'http'):
-        if next_page_link.startswith(u'?'):
+    if not next_page_link.startswith('http'):
+        if next_page_link.startswith('?'):
             # We have some "?current_page=2" scheme.
             next_page_link = base_url + next_page_link
 
-        if next_page_link.startswith(u'/'):
+        if next_page_link.startswith('/'):
             # We have a server-relative path.
 
-            try:
-                proto, host_and_port, remaining = split_url(base_url)
+            proto, host_and_port, remaining = split_url(base_url)
 
-            except:
-                LOGGER.error(u'Could not split “%s” to get schema/host parts, '
-                             u'next_page_link “%s” will be unusable.',
-                             base_url, next_page_link)
+# except:
+# LOGGER.error('Could not split “%s” to get schema/host parts, '
+# 'next_page_link “%s” will be unusable.',
+# base_url, next_page_link)
 
-            else:
-                next_page_link = '{0}://{1}{2}'.format(proto,
-                                                       host_and_port,
-                                                       next_page_link)
+# TODO only do if succ
+            next_page_link = '{0}://{1}{2}'.format(proto,
+                                                   host_and_port,
+                                                   next_page_link)
         else:
-            LOGGER.warning(u'Unimplemented scheme in '
-                           u'next_page_link %s',
+            LOGGER.warning('Unimplemented scheme in '
+                           'next_page_link %s',
                            next_page_link)
 
     return next_page_link
 
 
 def ftr_process(url=None, content=None, config=None, base_url=None):
-    u""" process an URL, or some already fetched content from a given URL.
+    """ process an URL, or some already fetched content from a given URL.
 
     :param url: The URL of article to extract. Can be
         ``None``, but only if you provide both ``content`` and
@@ -169,21 +151,19 @@ def ftr_process(url=None, content=None, config=None, base_url=None):
             result = requests_get(url)
 
             if result.status_code != requests.codes.ok:
-                LOGGER.error(u'Wrong status code in return while getting '
-                             u'“%s”.', url)
+                LOGGER.error('Wrong status code in return while getting '
+                             '“%s”.', url)
                 return None
 
-            # Override before accessing result.text ; see `requests` doc.
-            result.encoding = detect_encoding_from_requests_response(result)
-
-            LOGGER.info(u'Downloaded %s bytes as %s text.',
+            LOGGER.info('Downloaded %s bytes as %s text.',
                         len(result.text), result.encoding)
 
             # result.text is always unicode
             content = result.text
 
-        except:
-            LOGGER.error(u'Content could not be fetched from URL %s.', url)
+        except Exception as e:
+            LOGGER.error('Content could not be fetched from URL %s.', url)
+            LOGGER.WARN(e)
             raise
 
     if config is None:

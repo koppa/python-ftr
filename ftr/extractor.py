@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-u""" Python FTR content extractor class and utils.
+""" Python FTR content extractor class and utils.
 
 .. Copyright 2015 Olivier Cortès <oc@1flow.io>.
 
@@ -19,40 +19,15 @@ u""" Python FTR content extractor class and utils.
     License along with python-ftr. If not, see http://www.gnu.org/licenses/
 """
 
-import os
 import logging
+import tidylib
 
-try:
-    from lxml import etree
-    # from lxml.cssselect import CSSSelector
-    from readability.readability import Document
-
-except ImportError:
-    # Avoid a crash during setup.py
-    # In normal conditions where deps are installed, this should not happen.
-    # Yeah I know it's an evil hack.
-    pass
-
-from StringIO import StringIO
+from lxml import etree
+# from lxml.cssselect import CSSSelector
+from readability.readability import Document
+from io import StringIO
 
 LOGGER = logging.getLogger(__name__)
-
-if bool(os.environ.get('FTR_TEST_ENABLE_SQLITE_LOGGING', False)):
-    LOGGER.info(u'Activating SQL logger for FTR testing environment.')
-    from ftr.app import SQLiteHandler
-    LOGGER.addHandler(SQLiteHandler(store_only=('siteconfig', )))
-
-
-try:
-    import tidylib
-
-except:
-    LOGGER.warning('Please install the tidy library (eg. tidyhtml on Arch '
-                   'Linux or libtidy-0.99-0 on Debian/Ubuntu). Things will '
-                   'work without it, but results will be eventually better '
-                   u'with it.')
-
-    tidylib = None
 
 
 class ContentExtractor(object):
@@ -117,7 +92,7 @@ class ContentExtractor(object):
         self.failures = set()
         self.success = False
 
-        LOGGER.debug(u'Reset extractor instance to defaults/empty.')
+        LOGGER.debug('Reset extractor instance to defaults/empty.')
 
     def _process_replacements(self, html):
         """ Do raw string replacements on :param:`html`. """
@@ -126,7 +101,7 @@ class ContentExtractor(object):
             for find_pattern, replace_pattern in self.config.replace_patterns:
                 html = html.replace(find_pattern, replace_pattern)
 
-            LOGGER.info(u'Done replacements.',
+            LOGGER.info('Done replacements.',
                         extra={'siteconfig': self.config.host})
 
         return html
@@ -159,7 +134,7 @@ class ContentExtractor(object):
             self.tidied = True
             self.html = document
 
-            LOGGER.info(u'Tidied document.')
+            LOGGER.info('Tidied document.')
 
         else:
             self.html = html
@@ -176,9 +151,9 @@ class ContentExtractor(object):
         try:
             self.parsed_tree = etree.parse(StringIO(self.html), self.parser)
 
-        except ValueError, e:
-            if u'Unicode strings with encoding declaration are not supported' \
-                    in unicode(e):
+        except ValueError as e:
+            if 'Unicode strings with encoding declaration are not supported' \
+                    in str(e):
 
                 # For some reason, the HTML/XML declares another encoding
                 # in its meta tags. TODO: we should probably remove this
@@ -211,20 +186,20 @@ class ContentExtractor(object):
             if len(items) == 1:
                 item = items[0]
 
-                if 'href' in item.keys():
+                if 'href' in list(item.keys()):
                     self.next_page_link = item.get('href')
 
                 else:
                     self.next_page_link = item.text.strip()
 
-                LOGGER.info(u'Found next page link: %s.',
+                LOGGER.info('Found next page link: %s.',
                             self.next_page_link)
 
                 # First found link is the good one.
                 break
 
             else:
-                LOGGER.warning(u'%s items for next-page link %s',
+                LOGGER.warning('%s items for next-page link %s',
                                items, pattern,
                                extra={'siteconfig': self.config.host})
 
@@ -245,7 +220,7 @@ class ContentExtractor(object):
             if not items:
                 continue
 
-            if isinstance(items, basestring):
+            if isinstance(items, str):
                 # In case xpath returns only one element.
                 items = [items]
 
@@ -257,9 +232,9 @@ class ContentExtractor(object):
 
                 except AttributeError:
                     # '_ElementStringResult' object has no attribute 'text'
-                    self.title = unicode(item).strip()
+                    self.title = str(item).strip()
 
-                LOGGER.info(u'Title extracted: “%s”.', self.title,
+                LOGGER.info('Title extracted: “%s”.', self.title,
                             extra={'siteconfig': self.config.host})
 
                 try:
@@ -270,22 +245,23 @@ class ContentExtractor(object):
                     # lxml.etree._Element, got _ElementStringResult)
                     pass
 
-                except AttributeError, e:
-                    if u'NoneType' not in unicode(e):
-                        LOGGER.exception(u'Could not remove title from '
-                                         u'document.',
+                except AttributeError as e:
+                    if 'NoneType' not in str(e):
+                        LOGGER.exception('Could not remove title from '
+                                         'document.',
                                          extra={'siteconfig': self.config.host})
                     # implicit: else: this is begnin
 
-                except:
-                    LOGGER.exception(u'Could not remove title from document.',
+                except Exception as e:
+                    LOGGER.exception('Could not remove title from document.',
                                      extra={'siteconfig': self.config.host})
+                    LOGGER.WARN(e)
 
                 # Exit at first item found.
                 break
 
             else:
-                LOGGER.warning(u'Multiple items (%s) for title pattern %s.',
+                LOGGER.warning('Multiple items (%s) for title pattern %s.',
                                items, pattern,
                                extra={'siteconfig': self.config.host})
 
@@ -299,15 +275,15 @@ class ContentExtractor(object):
 
             items = self.parsed_tree.xpath(pattern)
 
-            if isinstance(items, basestring):
+            if isinstance(items, str):
                 # In case xpath returns only one element.
                 items = [items]
 
             for item in items:
 
-                if isinstance(item, basestring):
+                if isinstance(item, str):
                     # '_ElementStringResult' object has no attribute 'text'
-                    stripped_author = unicode(item).strip()
+                    stripped_author = str(item).strip()
 
                 else:
                     try:
@@ -319,7 +295,7 @@ class ContentExtractor(object):
 
                 if stripped_author:
                     self.author.add(stripped_author)
-                    LOGGER.info(u'Author extracted: %s.', stripped_author,
+                    LOGGER.info('Author extracted: %s.', stripped_author,
                                 extra={'siteconfig': self.config.host})
 
     def _extract_language(self):
@@ -336,7 +312,7 @@ class ContentExtractor(object):
 
                 if stripped_language:
                     self.language = stripped_language
-                    LOGGER.info(u'Language extracted: %s.', stripped_language,
+                    LOGGER.info('Language extracted: %s.', stripped_language,
                                 extra={'siteconfig': self.config.host})
                     found = True
                     break
@@ -356,14 +332,14 @@ class ContentExtractor(object):
 
             items = self.parsed_tree.xpath(pattern)
 
-            if isinstance(items, basestring):
+            if isinstance(items, str):
                 # In case xpath returns only one element.
                 items = [items]
 
             for item in items:
-                if isinstance(item, basestring):
+                if isinstance(item, str):
                     # '_ElementStringResult' object has no attribute 'text'
-                    stripped_date = unicode(item).strip()
+                    stripped_date = str(item).strip()
 
                 else:
                     try:
@@ -379,7 +355,7 @@ class ContentExtractor(object):
                 if stripped_date:
                     # self.date = strtotime(trim(elems, "; \t\n\r\0\x0B"))
                     self.date = stripped_date
-                    LOGGER.info(u'Date extracted: %s.', stripped_date,
+                    LOGGER.info('Date extracted: %s.', stripped_date,
                                 extra={'siteconfig': self.config.host})
                     found = True
                     break
@@ -392,7 +368,7 @@ class ContentExtractor(object):
         def _remove(xpath_expression):
             for item in self.parsed_tree.xpath(xpath_expression):
                 item.getparent().remove(item)
-                LOGGER.debug(u'Removed unwanted item %s.', item,
+                LOGGER.debug('Removed unwanted item %s.', item,
                              extra={'siteconfig': self.config.host})
 
         # Strip elements that use xpath expressions.
@@ -492,22 +468,21 @@ class ContentExtractor(object):
 
                                 if 'id="readabilityBody"' in pruned_string:
                                     try:
-                                        body.append(
-                                            new_tree.xpath('//body')
-                                        )
-                                    except:
+                                        body.append(new_tree.xpath('//body'))
+                                    except Exception as e:
+                                        logging.WARN(e)
                                         failed = True
 
                                 else:
                                     failed = True
 
                             if failed:
-                                LOGGER.error(u'Pruning item failed:'
-                                             u'\n\n%s\n\nWe got: “%s” '
-                                             u'and skipped it.',
+                                LOGGER.error('Pruning item failed:'
+                                             '\n\n%s\n\nWe got: “%s” '
+                                             'and skipped it.',
                                              etree.tostring(
-                                                 item).replace(u'\n', u''),
-                                             pruned_string.replace(u'\n', u''),
+                                                 item).replace('\n', ''),
+                                             pruned_string.replace('\n', ''),
                                              extra={'siteconfig':
                                                     self.config.host})
                                 pass
@@ -539,7 +514,7 @@ class ContentExtractor(object):
 
             if title:
                 self.title = title
-                LOGGER.info(u'Title extracted in automatic mode.',
+                LOGGER.info('Title extracted in automatic mode.',
                             extra={'siteconfig': self.config.host})
 
             else:
@@ -553,7 +528,7 @@ class ContentExtractor(object):
 
             if body:
                 self.body = body
-                LOGGER.info(u'Body extracted in automatic mode.',
+                LOGGER.info('Body extracted in automatic mode.',
                             extra={'siteconfig': self.config.host})
 
             else:
@@ -563,14 +538,14 @@ class ContentExtractor(object):
             if not bool(getattr(self, attr_name, None)):
                 if bool(getattr(self.config, attr_name, None)):
                     self.failures.add(attr_name)
-                    LOGGER.warning(u'Could not extract any %s from XPath '
-                                   u'expression(s) %s.', attr_name,
-                                   u', '.join(getattr(self.config, attr_name)),
+                    LOGGER.warning('Could not extract any %s from XPath '
+                                   'expression(s) %s.', attr_name,
+                                   ', '.join(getattr(self.config, attr_name)),
                                    extra={'siteconfig': self.config.host})
                     # import ipdb; ipdb.set_trace()
 
     def process(self, html, url=None, smart_tidy=True):
-        u""" Process HTML content or URL.
+        """ Process HTML content or URL.
 
         For automatic extraction patterns and cleanups, :mod:`readability-lxml`
         is used, to stick as much as possible to the original PHP
@@ -614,7 +589,7 @@ class ContentExtractor(object):
         # TODO: re-implement URL handling with self.reset() here.
 
         if self.config is None:
-            raise RuntimeError(u'extractor site config is not set.')
+            raise RuntimeError('extractor site config is not set.')
 
         # TODO: If re-running ourselves over an already-replaced string,
         #       this should just do nothing because everything has been
