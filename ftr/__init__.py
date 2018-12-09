@@ -24,9 +24,6 @@ import logging
 
 logging.getLogger('requests').setLevel(logging.ERROR)
 
-# Import the sparks-managed version.
-from .version import version  # NOQA
-
 from .config import (  # NOQA
     ftr_get_config as get_config,
     SiteConfig,
@@ -43,6 +40,3 @@ from .extractor import (  # NOQA
 from .process import (  # NOQA
     ftr_process as process,
 )
-
-# Advertise version to external tools like Sentry.
-__version__ = version

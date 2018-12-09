@@ -9,15 +9,9 @@ from setuptools import setup, find_packages
 if '.' in sys.path:
     sys.path.remove('.')
 
-# We want to be sure that Python will import the sparks from here, and not
-# the one eventually installed system-wide or in the current virtualenv.
-sys.path.insert(0, '.')
-
-from ftr.version import version
-
 setup(
     name="ftr",
-    version=version,
+    version='0.0',
     author="Olivier Cortès",
     author_email="contact@oliviercortes.com",
     description="HTML Article cleaner / extractor, Five-Filters compatible.",
@@ -26,7 +20,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     dependency_links=[
-        'https://github.com/1flow/sparks/tarball/master#egg=sparks',
         'https://github.com/Karmak23/humanize/tarball/master#egg=humanize',
     ],
     install_requires=[

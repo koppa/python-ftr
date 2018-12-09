@@ -156,10 +156,8 @@ class ContentExtractor(object):
                     in str(e):
 
                 # For some reason, the HTML/XML declares another encoding
-                # in its meta tags. TODO: we should probably remove this
-                # meta tag, because the sparks detection mechanism usually
-                # does a pretty good job at finding it.
-                #
+                # in its meta tags.
+
                 # For now, this will fail for anything other than utf-8 and
                 # make the program crash.
                 self.parsed_tree = etree.parse(StringIO(

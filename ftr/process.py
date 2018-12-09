@@ -35,14 +35,12 @@ import logging
 
 import requests
 
+from urllib.parse import urlparse
+
 from .config import ftr_get_config, SiteConfig
 from .extractor import ContentExtractor
 
 LOGGER = logging.getLogger(__name__)
-
-
-def split_url(u):
-    raise NotImplementedError("Not implemented, originally in sparks")
 
 
 def requests_get(url):
@@ -69,7 +67,8 @@ def sanitize_next_page_link(next_page_link, base_url):
         if next_page_link.startswith('/'):
             # We have a server-relative path.
 
-            proto, host_and_port, remaining = split_url(base_url)
+            u = urlparse(base_url)
+            proto, host_and_port = u.scheme, u.netloc
 
 # except:
 # LOGGER.error('Could not split “%s” to get schema/host parts, '

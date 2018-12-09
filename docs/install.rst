@@ -21,7 +21,6 @@ Or install directly via github::
 
 	# dependancies
 	pip install git+https://github.com/Karmak23/humanize.git@master#egg=humanize
-	pip install git+https://github.com/1flow/sparks.git@master#egg=sparks
 
 	# Python-FTR itself
 	pip install git+https://github.com/1flow/python-ftr.git@master#egg=ftr
